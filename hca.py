@@ -90,30 +90,36 @@ class http_cache_analyzer:
   def analyze_header_cachecontrol(self, cachecontrol):
     score_modifier = 0
 
-    cache_control_values_single = [
-      "must-revalidate",
-      "no-cache",
-      "no-store",
-      "no-transform",
-      "public",
-      "private",
-      "proxy-revalidate",
-    ]
-    cache_control_expirations = [
-      "max-age=",
-      "s-maxage="
-    ]
+    cache_control_values_single = {
+      "must-revalidate": -1,
+      "no-cache": -10,
+      "no-store": -5,
+      "no-transform": 5,
+      "public": 0,
+      "private": 0,
+      "proxy-revalidate": 0,
+    }
+    cache_control_expirations = {
+      "max-age=": 5,
+      "s-maxage=": 5,
+    }
+
     tokens = cachecontrol.split(', ')
-    print(tokens)
-    for cache_control_value in cache_control_values_single:
+    #print(tokens)
+    for cache_control_value, ccv_modifier in cache_control_values_single.items():
       if cache_control_value in tokens:
         show_ok("{} is in cache-control".format(cache_control_value))
+        score_modifier += ccv_modifier
 
-    for cache_control_value in cache_control_expirations:
+    for cache_control_value, ccv_modifier in cache_control_expirations.items():
       for token in tokens:
         if cache_control_value in token:
           (ccv, seconds) = token.split("=")
           print("Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
+          if int(seconds) <= 0:
+            show_warning("Cache-Control has {} value to 0 or lower, lowering the score by {}".format(ccv, ccv_modifier))
+            ccv_modifier = -ccv_modifier
+          score_modifier += ccv_modifier
 
     return score_modifier
 
