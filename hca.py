@@ -115,7 +115,7 @@ class http_cache_analyzer:
           (ccv, seconds) = token.split("=")
           print("Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
 
-
+    return score_modifier
 
   def analyze_headers(self):
     print("")
