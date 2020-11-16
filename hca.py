@@ -148,10 +148,14 @@ class http_cache_analyzer:
     ETag
     """
     if 'ETag' in self.usefull_headers:
-      show_ok("ETag is present, current value: {}".format(self.usefull_headers['ETag']))
+      etag = self.usefull_headers['ETag'].strip('"\'')
+      etag_strs = ["ETag is present, current value: {}.".format(etag)]
       score += 10
-      if self.usefull_headers['ETag'][-5:] == "-gzip":
+      if etag[-5:] == "-gzip":
         score += 5
+        etag_strs.append("Etag is gzipped, bonus points")
+      show_ok(" ".join(etag_strs))
+
     else:
       etag_strs = ["ETag is absent."]
       if 'Cache-Control' in self.usefull_headers:
