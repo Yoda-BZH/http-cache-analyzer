@@ -150,7 +150,7 @@ class http_cache_analyzer:
     if 'ETag' in self.usefull_headers:
       show_ok("ETag is present, current value: {}".format(self.usefull_headers['ETag']))
       score += 10
-      if self.usefull_headers['ETag'][-5:] == "-gzip":w
+      if self.usefull_headers['ETag'][-5:] == "-gzip":
         score += 5
     else:
       etag_strs = ["ETag is absent."]
