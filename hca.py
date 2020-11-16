@@ -88,6 +88,8 @@ class http_cache_analyzer:
     self.analyze_headers()
 
   def analyze_header_cachecontrol(self, cachecontrol):
+    score_modifier = 0
+
     cache_control_values_single = [
       "must-revalidate",
       "no-cache",
@@ -134,8 +136,10 @@ class http_cache_analyzer:
     """
     if 'Cache-Control' in self.usefull_headers:
       show_ok("Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
-      self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
       score += 30
+      score += self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
+      #if 'Age' not in self.usefull_headers:
+      #  show_warning("But wait, age is not present ?")
     else:
       show_warning("Cache-Control is absent. Default value is '{}', which deactive all cache mecanismes".format('no-store, no-cache'))
       score -= 30
@@ -146,6 +150,8 @@ class http_cache_analyzer:
     if 'ETag' in self.usefull_headers:
       show_ok("ETag is present, current value: {}".format(self.usefull_headers['ETag']))
       score += 10
+      if self.usefull_headers['ETag'][-5:] == "-gzip":w
+        score += 5
     else:
       etag_strs = ["ETag is absent."]
       if 'Cache-Control' in self.usefull_headers:
