@@ -8,6 +8,17 @@ import requests
 import socket
 import requests.packages.urllib3.util.connection as urllib3_cn
 
+default_scheme = "https://"
+
+def show_ok(text):
+  print("[OK] {}".format(text))
+
+def show_warning(text):
+  print("[!!] {}".format(text))
+
+def show_info(text):
+  print("[--] {}".format(text))
+
 
 class http_cache_analyzer:
   options = {}
@@ -38,11 +49,16 @@ class http_cache_analyzer:
     return family
 
 
-  def request(self, url, **options):
+  def request(self, user_url, **options):
     self.options = options['options']
     del(self.options['url'])
     #print(self.options)
     urllib3_cn.allowed_gai_family = self.allowed_gai_family
+
+    url = user_url
+    scheme_token = url[:5]
+    if scheme_token != "https" and scheme_token != "http:":
+      url = "{}{}".format(default_scheme, url)
 
     print("Requesting url {}".format(url))
     self.response = requests.get(url)
@@ -89,7 +105,7 @@ class http_cache_analyzer:
     print(tokens)
     for cache_control_value in cache_control_values_single:
       if cache_control_value in tokens:
-        print("{} is in cache-control".format(cache_control_value))
+        show_ok("{} is in cache-control".format(cache_control_value))
 
     for cache_control_value in cache_control_expirations:
       for token in tokens:
@@ -106,56 +122,62 @@ class http_cache_analyzer:
     Age
     """
     if 'Age' in self.usefull_headers:
-      print("Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
+      show_ok("Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
     else:
-      print("Age is absent.")
+      show_info("Age is absent.")
 
     """
     Cache-Control
     """
     if 'Cache-Control' in self.usefull_headers:
-      print("Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
+      show_ok("Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
       self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
     else:
-      print("Cache-Control: NOK")
+      show_warning("Cache-Control is absent. Default value is '{}', which deactive all cache mecanismes".format('no-store, no-cache'))
 
     """
     ETag
     """
     if 'ETag' in self.usefull_headers:
-      print("ETag ok")
+      show_ok("ETag is present, current value: {}".format(self.usefull_headers['ETag']))
     else:
-      print("ETag NOK")
+      etag_strs = ["ETag is absent."]
+      if 'Cache-Control' in self.usefull_headers:
+        etag_strs.append("But it's ok, Cache-Control can be used too.")
+        show_info(" ".join(etag_strs))
+      else:
+        etag_strs.append("Cache-Control is absent too. No cache can be made.")
+        show_warning(" ".join(etag_strs))
 
     """
     Expire
     """
     if 'Expire' in self.usefull_headers:
       if 'Cache-Control' in self.usefull_headers:
-        print("Expire is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expire']))
+        show_ok("Expire is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expire']))
       else:
-        print("Expire ok, '{}'".format(self.usefull_headers['Expire']))
+        show_ok("Expire ok, '{}'".format(self.usefull_headers['Expire']))
     else:
       if 'Cache-Control' in self.usefull_headers:
-        print("Expire is absent, but Cache-Control is present, which is good.")
+        show_ok("Expire is absent, but Cache-Control is present, which is good.")
       else:
-        print("Expire is absent. It's ok")
+        show_info("Expire is absent. It's ok")
 
     """
     Last-Modified
     """
     if 'Last-Modified' in self.usefull_headers:
-      print("Last-Modified ok")
+      show_ok("Last-Modified ok")
     else:
-      print("Last-Modified is absent, it's okay")
+      show_info("Last-Modified is absent, it's okay")
 
     """
     Pragma
     """
     if 'Pragma' in self.usefull_headers:
-      print("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
+      show_info("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
     else:
-      print("Pragma is absent. good.")
+      show_ok("Pragma is absent. It'good. Pragma is useless since HTTP/1.1. ")
 
 
 if __name__ == "__main__":
