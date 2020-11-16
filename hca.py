@@ -110,6 +110,10 @@ class http_cache_analyzer:
       if cache_control_value in tokens:
         show_ok("{} is in cache-control".format(cache_control_value))
         score_modifier += ccv_modifier
+        if score_modifier > 0:
+          show_ok("Cache-Control has {}, adding {} points".format(cache_control_value, ccv_modifier))
+        else:
+          show_warning("Cache-Control has {}, removing {} points".format(cache_control_value, ccv_modifier))
 
     for cache_control_value, ccv_modifier in cache_control_expirations.items():
       for token in tokens:
@@ -118,6 +122,8 @@ class http_cache_analyzer:
           print("Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
           if int(seconds) <= 0:
             show_warning("Cache-Control has {} value to 0 or lower, lowering the score by {}".format(ccv, ccv_modifier))
+          else:
+            show_ok("Cache-Control has {} value to 0 or lower, adding {} points to the score".format(ccv, ccv_modifier))
             ccv_modifier = -ccv_modifier
           score_modifier += ccv_modifier
 
