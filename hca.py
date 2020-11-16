@@ -118,11 +118,14 @@ class http_cache_analyzer:
   def analyze_headers(self):
     print("")
 
+    score = 50
+
     """
     Age
     """
     if 'Age' in self.usefull_headers:
       show_ok("Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
+      score += 10
     else:
       show_info("Age is absent.")
 
@@ -132,14 +135,17 @@ class http_cache_analyzer:
     if 'Cache-Control' in self.usefull_headers:
       show_ok("Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
       self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
+      score += 30
     else:
       show_warning("Cache-Control is absent. Default value is '{}', which deactive all cache mecanismes".format('no-store, no-cache'))
+      score -= 30
 
     """
     ETag
     """
     if 'ETag' in self.usefull_headers:
       show_ok("ETag is present, current value: {}".format(self.usefull_headers['ETag']))
+      score += 10
     else:
       etag_strs = ["ETag is absent."]
       if 'Cache-Control' in self.usefull_headers:
@@ -148,6 +154,7 @@ class http_cache_analyzer:
       else:
         etag_strs.append("Cache-Control is absent too. No cache can be made.")
         show_warning(" ".join(etag_strs))
+        score -= 10
 
     """
     Expire
@@ -157,6 +164,7 @@ class http_cache_analyzer:
         show_ok("Expire is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expire']))
       else:
         show_ok("Expire ok, '{}'".format(self.usefull_headers['Expire']))
+        score += 5
     else:
       if 'Cache-Control' in self.usefull_headers:
         show_ok("Expire is absent, but Cache-Control is present, which is good.")
@@ -167,7 +175,8 @@ class http_cache_analyzer:
     Last-Modified
     """
     if 'Last-Modified' in self.usefull_headers:
-      show_ok("Last-Modified ok")
+      show_ok("Last-Modified is presnt, current value: '{}'".format(self.usefull_headers['Last-Modified']))
+      score += 5
     else:
       show_info("Last-Modified is absent, it's okay")
 
@@ -176,9 +185,11 @@ class http_cache_analyzer:
     """
     if 'Pragma' in self.usefull_headers:
       show_info("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
+      score -= 5
     else:
       show_ok("Pragma is absent. It'good. Pragma is useless since HTTP/1.1. ")
 
+    print("Final score: {}/100".format(score))
 
 if __name__ == "__main__":
 
