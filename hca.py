@@ -30,6 +30,7 @@ class http_cache_analyzer:
   max_time = 30
   connect_timeout = 30
 
+  score = 50
   meaningfull_headers = ['Age', 'Cache-Control', 'ETag', 'Expire', 'Last-Modified', 'Pragma']
 
 
@@ -132,14 +133,13 @@ class http_cache_analyzer:
   def analyze_headers(self):
     print("")
 
-    score = 50
 
     """
     Age
     """
     if 'Age' in self.usefull_headers:
       show_ok("Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
-      score += 10
+      self.score += 10
     else:
       show_info("Age is absent.")
 
@@ -148,13 +148,13 @@ class http_cache_analyzer:
     """
     if 'Cache-Control' in self.usefull_headers:
       show_ok("Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
-      score += 30
-      score += self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
+      self.score += 30
+      self.score += self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
       #if 'Age' not in self.usefull_headers:
       #  show_warning("But wait, age is not present ?")
     else:
       show_warning("Cache-Control is absent. Default value is '{}', which deactive all cache mecanismes".format('no-store, no-cache'))
-      score -= 30
+      self.score -= 30
 
     """
     ETag
@@ -162,9 +162,9 @@ class http_cache_analyzer:
     if 'ETag' in self.usefull_headers:
       etag = self.usefull_headers['ETag'].strip('"\'')
       etag_strs = ["ETag is present, current value: {}.".format(etag)]
-      score += 10
+      self.score += 10
       if etag[-5:] == "-gzip":
-        score += 5
+        self.score += 5
         etag_strs.append("Etag is gzipped, bonus points")
       show_ok(" ".join(etag_strs))
 
@@ -176,7 +176,7 @@ class http_cache_analyzer:
       else:
         etag_strs.append("Cache-Control is absent too. No cache can be made.")
         show_warning(" ".join(etag_strs))
-        score -= 10
+        self.score -= 10
 
     """
     Expire
@@ -186,7 +186,7 @@ class http_cache_analyzer:
         show_ok("Expire is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expire']))
       else:
         show_ok("Expire ok, '{}'".format(self.usefull_headers['Expire']))
-        score += 5
+        self.score += 5
     else:
       if 'Cache-Control' in self.usefull_headers:
         show_ok("Expire is absent, but Cache-Control is present, which is good.")
@@ -198,7 +198,7 @@ class http_cache_analyzer:
     """
     if 'Last-Modified' in self.usefull_headers:
       show_ok("Last-Modified is presnt, current value: '{}'".format(self.usefull_headers['Last-Modified']))
-      score += 5
+      self.score += 5
     else:
       show_info("Last-Modified is absent, it's okay")
 
@@ -207,11 +207,11 @@ class http_cache_analyzer:
     """
     if 'Pragma' in self.usefull_headers:
       show_info("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
-      score -= 5
+      self.score -= 5
     else:
       show_ok("Pragma is absent. It'good. Pragma is useless since HTTP/1.1. ")
 
-    print("Final score: {}/100".format(score))
+    print("Final score: {}/100".format(self.score))
 
 if __name__ == "__main__":
 
