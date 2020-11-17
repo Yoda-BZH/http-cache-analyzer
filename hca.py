@@ -64,6 +64,8 @@ class http_cache_analyzer:
     print("Requesting url {}".format(url))
     self.response = requests.get(url)
     print(self.response.status_code)
+    if self.response.status_code > 299:
+      self.score -= 40
 
     return self.response
 
