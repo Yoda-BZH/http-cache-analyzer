@@ -225,7 +225,7 @@ class http_cache_analyzer:
     """
     show_title("Header Last-Modified")
     if 'Last-Modified' in self.usefull_headers:
-      show_ok("Last-Modified is presnt, current value: '{}'".format(self.usefull_headers['Last-Modified']))
+      show_ok("Last-Modified is present, current value: '{}'".format(self.usefull_headers['Last-Modified']))
       self.score += 5
     else:
       show_info("Last-Modified is absent, it's okay")
