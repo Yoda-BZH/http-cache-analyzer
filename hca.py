@@ -74,6 +74,9 @@ class http_cache_analyzer:
     else:
       show_ok("HTTP Status code is {}".format(self.response.status_code))
 
+    if self.response.url != url:
+      show_warning("Request was redirected to {}".format(self.response.url))
+
     return self.response
 
   def get_headers(self):
