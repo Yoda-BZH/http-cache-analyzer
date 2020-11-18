@@ -19,6 +19,10 @@ def show_warning(text):
 def show_info(text):
   print("[--] {}".format(text))
 
+def show_title(text):
+  print("")
+  print("{} {} {}".format('-' * 8, text, '-' * (80 - 2 - len(text))))
+
 
 class http_cache_analyzer:
   options = {}
@@ -51,6 +55,7 @@ class http_cache_analyzer:
 
 
   def request(self, user_url, **options):
+    show_title("HTTP Query")
     self.options = options['options']
     del(self.options['url'])
     #print(self.options)
@@ -61,11 +66,13 @@ class http_cache_analyzer:
     if scheme_token != "https" and scheme_token != "http:":
       url = "{}{}".format(default_scheme, url)
 
-    print("Requesting url {}".format(url))
+    show_info("Requesting url {}".format(url))
     self.response = requests.get(url)
-    print(self.response.status_code)
     if self.response.status_code > 299:
+      show_warning("HTTP Status code is {}".format(self.response.status_code))
       self.score -= 40
+    else:
+      show_ok("HTTP Status code is {}".format(self.response.status_code))
 
     return self.response
 
@@ -85,7 +92,10 @@ class http_cache_analyzer:
       self.response = response
 
     self.headers = self.get_headers()
-    print(self.headers)
+    show_title("HTTP Header list")
+    for key, value in self.headers.items():
+      show_info("{}: {}".format(key, value))
+
     self.usefull_headers = self.filter_cache_headers()
     #print(self.headers)
     self.analyze_headers()
@@ -95,12 +105,12 @@ class http_cache_analyzer:
 
     cache_control_values_single = {
       "must-revalidate": -1,
-      "no-cache": -10,
-      "no-store": -5,
+      "no-cache": -20,
+      "no-store": -20,
       "no-transform": 5,
-      "public": 0,
-      "private": 0,
-      "proxy-revalidate": 0,
+      "public": 5,
+      "private": 5,
+      "proxy-revalidate": -5,
     }
     cache_control_expirations = {
       "max-age=": 5,
@@ -111,7 +121,7 @@ class http_cache_analyzer:
     #print(tokens)
     for cache_control_value, ccv_modifier in cache_control_values_single.items():
       if cache_control_value in tokens:
-        show_ok("{} is in cache-control".format(cache_control_value))
+        #show_info("{} is in cache-control".format(cache_control_value))
         score_modifier += ccv_modifier
         if score_modifier > 0:
           show_ok("Cache-Control has {}, adding {} points".format(cache_control_value, ccv_modifier))
@@ -122,7 +132,7 @@ class http_cache_analyzer:
       for token in tokens:
         if cache_control_value in token:
           (ccv, seconds) = token.split("=")
-          print("Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
+          show_info("Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
           if int(seconds) <= 0:
             show_warning("Cache-Control has {} value to 0 or lower, lowering the score by {}".format(ccv, ccv_modifier))
           else:
@@ -139,6 +149,7 @@ class http_cache_analyzer:
     """
     Age
     """
+    show_title("Header Age")
     if 'Age' in self.usefull_headers:
       show_ok("Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
       self.score += 10
@@ -148,6 +159,7 @@ class http_cache_analyzer:
     """
     Cache-Control
     """
+    show_title("Header Cache-Control")
     if 'Cache-Control' in self.usefull_headers:
       show_ok("Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
       self.score += 30
@@ -161,6 +173,7 @@ class http_cache_analyzer:
     """
     ETag
     """
+    show_title("Header ETag")
     if 'ETag' in self.usefull_headers:
       etag = self.usefull_headers['ETag'].strip('"\'')
       etag_strs = ["ETag is present, current value: {}.".format(etag)]
@@ -183,6 +196,7 @@ class http_cache_analyzer:
     """
     Expire
     """
+    show_title("Header Expire")
     if 'Expire' in self.usefull_headers:
       if 'Cache-Control' in self.usefull_headers:
         show_ok("Expire is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expire']))
@@ -198,6 +212,7 @@ class http_cache_analyzer:
     """
     Last-Modified
     """
+    show_title("Header Last-Modified")
     if 'Last-Modified' in self.usefull_headers:
       show_ok("Last-Modified is presnt, current value: '{}'".format(self.usefull_headers['Last-Modified']))
       self.score += 5
@@ -207,12 +222,14 @@ class http_cache_analyzer:
     """
     Pragma
     """
+    show_title("Header Pragma")
     if 'Pragma' in self.usefull_headers:
       show_info("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
       self.score -= 5
     else:
       show_ok("Pragma is absent. It'good. Pragma is useless since HTTP/1.1. ")
 
+    print("")
     print("Final score: {}/100".format(self.score))
 
 if __name__ == "__main__":
