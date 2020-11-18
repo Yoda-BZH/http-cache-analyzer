@@ -74,8 +74,16 @@ class http_cache_analyzer:
     else:
       show_ok("HTTP Status code is {}".format(self.response.status_code))
 
-    if self.response.url != url:
+    if self.response.url.rstrip('/') != url.rstrip('/'):
       show_warning("Request was redirected to {}".format(self.response.url))
+
+    if len(self.response.history) > 0:
+      redirect_strs = [url]
+      for history in self.response.history:
+        redirect_strs.append(history.url)
+      redirect_strs.append(self.response.url)
+      redirect_strs = " -> ".join(redirect_strs)
+      show_warning("Request was redirected: {}".format(redirect_strs))
 
     return self.response
 
