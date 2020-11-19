@@ -162,7 +162,8 @@ class http_cache_analyzer:
             if header_test['match'] in self.headers[header_name]:
               show_info("HTTP header '{}': '{}' is matching '{}'".format(header_name, self.headers[header_name], header_test['match']))
               show_info("A cache system is detected: {}".format(header_test['provider']))
-          cache_system_found = True
+              cache_system_found = True
+
     if cache_system_found == False:
       show_info("No caching system found")
 
