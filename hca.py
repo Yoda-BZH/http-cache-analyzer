@@ -116,6 +116,18 @@ class http_cache_analyzer:
           'provider': 'AWS'
         },
       },
+      'Server': {
+        'cloudflare': {
+          'match': 'cloudflare',
+          'provider': 'cloudflare',
+        }
+      },
+      'Expect-CT': {
+        'cloudflare': {
+          'match': 'cloudflare',
+          'provider': 'cloudflare',
+        }
+      }
     }
     show_title("Cache systems")
     cache_system_found = False
