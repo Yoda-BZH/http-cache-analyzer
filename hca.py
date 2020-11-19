@@ -132,6 +132,12 @@ class http_cache_analyzer:
           'provider': 'cloudflare',
         }
       },
+      'P3P': {
+        'GCP': {
+          'match': 'CP="This is not a P3P policy! See g.co/p3phelp for more info."',
+          'provider': 'GCP',
+        }
+      },
     }
     show_title("Cache systems")
     cache_system_found = False
