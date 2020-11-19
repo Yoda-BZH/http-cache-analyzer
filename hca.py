@@ -106,6 +106,9 @@ class http_cache_analyzer:
       'Akamai-Cache-Status': {
         'provider': 'Akamai',
       },
+      'X-Edge-Location': {
+        'provider': 'KeyCDN',
+      },
       'Via': {
         'varnish': {
           'match': 'varnish',
@@ -138,6 +141,12 @@ class http_cache_analyzer:
           'provider': 'GCP',
         }
       },
+      'Content-Security-Policy': {
+        'cloudflare': {
+          'match': 'cloudflare.com',
+          'provider': 'cloudflare',
+        }
+      }
     }
     show_title("Cache systems")
     cache_system_found = False
