@@ -53,7 +53,6 @@ class http_cache_analyzer:
 
     return family
 
-
   def request(self, user_url, **options):
     show_title("HTTP Query")
     self.options = options['options']
@@ -90,6 +89,52 @@ class http_cache_analyzer:
   def get_headers(self):
     return self.response.headers
 
+  def detect_public_cache(self):
+    public_cache_headers = {
+      'X-Varnish': {
+        'provider': 'Varnish',
+      },
+      'X-Cache': {
+        'provider': 'AWS or Varnish',
+      },
+      'X-Cache-Hits': {
+        'provider': 'Varnish',
+      },
+      'X-Datacenter': {
+        'provider': 'Azure',
+      },
+      'Akamai-Cache-Status': {
+        'provider': 'Akamai',
+      },
+      'Via': {
+        'varnish': {
+          'match': 'varnish',
+          'provider': 'Varnish',
+        },
+        'cloudfront': {
+          'match': 'CloudFront',
+          'provider': 'AWS'
+        },
+      },
+    }
+    show_title("Cache systems")
+    cache_system_found = False
+    for header_name, header_data in public_cache_headers.items():
+      #print("Trying {}".format(header_name))
+      if header_name in self.response.headers:
+        if 'provider' in header_data:
+          show_info("Presence of header '{}': '{}'".format(header_name, self.response.headers[header_name]))
+          show_info("A cache system is detected: {}".format(header_data['provider']))
+          cache_system_found = True
+        else:
+          for key, header_test in header_data.items():
+            if header_test['match'] in self.headers[header_name]:
+              show_info("HTTP header '{}': '{}' is matching '{}'".format(header_name, self.headers[header_name], header_test['match']))
+              show_info("A cache system is detected: {}".format(header_test['provider']))
+          cache_system_found = True
+    if cache_system_found == False:
+      show_info("No caching system found")
+
   def filter_cache_headers(self):
     h = {}
     for meaningfull_header in self.meaningfull_headers:
@@ -106,6 +151,8 @@ class http_cache_analyzer:
     show_title("HTTP Header list")
     for key, value in self.headers.items():
       show_info("{}: {}".format(key, value))
+
+    self.detect_public_cache()
 
     self.usefull_headers = self.filter_cache_headers()
     #print(self.headers)
@@ -154,8 +201,6 @@ class http_cache_analyzer:
     return score_modifier
 
   def analyze_headers(self):
-    print("")
-
 
     """
     Age
