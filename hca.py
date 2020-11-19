@@ -336,7 +336,7 @@ if __name__ == "__main__":
   parser.add_argument('-v', '--verbose',    required=False, help="Set to verbose", action="store_true")
   parser.add_argument('-q', '--quiet',    required=False, help="Set to quiet", action="store_true")
 
-  parser.add_argument('-A', '--user-agent', required=False, help="User agent to use", type=str, default="HTTP Cache Analyzer")
+  parser.add_argument('-A', '--user-agent', required=False, help="User agent to use", type=str, default="HTTP Cache Analyzer https://github.com/Yoda-BZH/http-cache-analyzer")
 
   group_ip = parser.add_mutually_exclusive_group()
   group_ip.add_argument('-4', '--ipv4', required=False, help="Resolve in ipv4 only", action="store_true")
