@@ -257,7 +257,7 @@ class http_cache_analyzer:
       #if 'Age' not in self.usefull_headers:
       #  show_warning("But wait, age is not present ?")
     else:
-      show_warning("Cache-Control is absent. Default value is '{}', which deactive all cache mecanismes".format('no-store, no-cache'))
+      show_warning("Cache-Control is absent. Default value is '{}', which deactivate all cache mecanismes".format('no-store, no-cache'))
       self.score -= 30
 
     """
