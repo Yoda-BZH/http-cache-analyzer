@@ -291,11 +291,11 @@ class http_cache_analyzer:
     Pragma
     """
     show_title("Header Pragma")
-    if 'Pragma' in self.usefull_headers:
+    if 'Pragma' in self.usefull_headers and self.usefull_headers['Pragma'] != "":
       show_info("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
       self.score -= 5
     else:
-      show_ok("Pragma is absent. It'good. Pragma is useless since HTTP/1.1. ")
+      show_ok("Pragma is absent or empty. It'good. Pragma is useless since HTTP/1.1. ")
 
     print("")
     print("Final score: {}/100".format(self.score))
