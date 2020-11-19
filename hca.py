@@ -35,7 +35,7 @@ class http_cache_analyzer:
   connect_timeout = 30
 
   score = 50
-  meaningfull_headers = ['Age', 'Cache-Control', 'ETag', 'Expire', 'Last-Modified', 'Pragma']
+  meaningfull_headers = ['Age', 'Cache-Control', 'ETag', 'Expires', 'Last-Modified', 'Pragma']
 
 
   def allowed_gai_family(self):
@@ -205,20 +205,20 @@ class http_cache_analyzer:
         self.score -= 10
 
     """
-    Expire
+    Expires
     """
-    show_title("Header Expire")
-    if 'Expire' in self.usefull_headers:
+    show_title("Header Expires")
+    if 'Expires' in self.usefull_headers:
       if 'Cache-Control' in self.usefull_headers:
-        show_ok("Expire is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expire']))
+        show_ok("Expires is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expires']))
       else:
-        show_ok("Expire ok, '{}'".format(self.usefull_headers['Expire']))
+        show_ok("Expires ok, '{}'".format(self.usefull_headers['Expires']))
         self.score += 5
     else:
       if 'Cache-Control' in self.usefull_headers:
-        show_ok("Expire is absent, but Cache-Control is present, which is good.")
+        show_ok("Expires is absent, but Cache-Control is present, which is good.")
       else:
-        show_info("Expire is absent. It's ok")
+        show_info("Expires is absent. It's ok")
 
     """
     Last-Modified
