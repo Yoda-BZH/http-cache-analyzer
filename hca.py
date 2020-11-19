@@ -166,6 +166,8 @@ class http_cache_analyzer:
 
     if cache_system_found == False:
       show_info("No caching system found")
+    else:
+      self.score += 20
 
   def filter_cache_headers(self):
     h = {}
