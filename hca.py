@@ -192,6 +192,11 @@ class http_cache_analyzer:
     #print(self.headers)
     self.analyze_headers()
 
+  def results(self):
+    show_title("Final score")
+    print("Final score: {}/100".format(self.score))
+    print("")
+
   def analyze_header_cachecontrol(self, cachecontrol):
     score_modifier = 0
 
@@ -319,9 +324,6 @@ class http_cache_analyzer:
     else:
       show_ok("Pragma is absent or empty. It'good. Pragma is useless since HTTP/1.1. ")
 
-    print("")
-    print("Final score: {}/100".format(self.score))
-
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
@@ -338,4 +340,5 @@ if __name__ == "__main__":
   hca = http_cache_analyzer()
   r = hca.request(args.url, options = vars(args))
   rr = hca.analyze()
+  hca.results()
 
