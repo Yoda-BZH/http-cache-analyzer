@@ -65,8 +65,12 @@ class http_cache_analyzer:
     if scheme_token != "https" and scheme_token != "http:":
       url = "{}{}".format(default_scheme, url)
 
+    request_headers = {
+      'User-Agent': self.options['user_agent'],
+    }
+
     show_info("Requesting url {}".format(url))
-    self.response = requests.get(url)
+    self.response = requests.get(url, headers = request_headers)
     if self.response.status_code > 299:
       show_warning("HTTP Status code is {}".format(self.response.status_code))
       self.score -= 40
@@ -331,6 +335,8 @@ if __name__ == "__main__":
   parser.add_argument('-r', '--resolve',       required=False, help="Resolve domain:port to ip", type=str)
   parser.add_argument('-v', '--verbose',    required=False, help="Set to verbose", action="store_true")
   parser.add_argument('-q', '--quiet',    required=False, help="Set to quiet", action="store_true")
+
+  parser.add_argument('-A', '--user-agent', required=False, help="User agent to use", type=str, default="HTTP Cache Analyzer")
 
   group_ip = parser.add_mutually_exclusive_group()
   group_ip.add_argument('-4', '--ipv4', required=False, help="Resolve in ipv4 only", action="store_true")
