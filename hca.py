@@ -206,7 +206,7 @@ class http_cache_analyzer:
           if int(seconds) <= 0:
             show_warning("Cache-Control has {} value to 0 or lower, lowering the score by {}".format(ccv, ccv_modifier))
           else:
-            show_ok("Cache-Control has {} value to 0 or lower, adding {} points to the score".format(ccv, ccv_modifier))
+            show_ok("Cache-Control has {} value to 0 or higher, adding {} points to the score".format(ccv, ccv_modifier))
             ccv_modifier = -ccv_modifier
           score_modifier += ccv_modifier
 
