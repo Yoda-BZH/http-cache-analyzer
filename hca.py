@@ -120,6 +120,10 @@ class http_cache_analyzer:
         'cloudflare': {
           'match': 'cloudflare',
           'provider': 'cloudflare',
+        },
+        'GCP': {
+          'match': 'gws',
+          'provider': 'GCP',
         }
       },
       'Expect-CT': {
@@ -127,7 +131,7 @@ class http_cache_analyzer:
           'match': 'cloudflare',
           'provider': 'cloudflare',
         }
-      }
+      },
     }
     show_title("Cache systems")
     cache_system_found = False
