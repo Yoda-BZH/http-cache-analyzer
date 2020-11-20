@@ -326,7 +326,7 @@ class http_cache_analyzer:
       show_info("Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
       self.score -= 5
     else:
-      show_ok("Pragma is absent or empty. It'good. Pragma is useless since HTTP/1.1. ")
+      show_ok("Pragma is absent or empty. It's good. Pragma is useless since HTTP/1.1. ")
 
 if __name__ == "__main__":
 
