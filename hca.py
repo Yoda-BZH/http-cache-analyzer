@@ -24,6 +24,25 @@ def show_title(text):
   print("{} {} {}".format('-' * 8, text, '-' * (80 - 2 - len(text))))
 
 
+#dns_cache = {}
+## Capture a dict of hostname and their IPs to override with
+#def override_dns(domain, ip):
+#    dns_cache[domain] = ip
+#
+#
+#prv_getaddrinfo = socket.getaddrinfo
+## Override default socket.getaddrinfo() and pass ip instead of host
+## if override is detected
+#def new_getaddrinfo(*args):
+#    if args[0] in dns_cache:
+#        print("Forcing FQDN: {} to IP: {}".format(args[0], dns_cache[args[0]]))
+#        return prv_getaddrinfo(dns_cache[args[0]], *args[1:])
+#    else:
+#        return prv_getaddrinfo(*args)
+#
+#
+#socket.getaddrinfo = new_getaddrinfo
+
 class http_cache_analyzer:
   options = {}
   request = None
@@ -332,7 +351,7 @@ if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
   parser.add_argument('url', type=str, help="URL to check")
-  parser.add_argument('-r', '--resolve',       required=False, help="Resolve domain:port to ip", type=str)
+  #parser.add_argument('-r', '--resolve',       required=False, help="Resolve domain:port to ip", type=str)
   parser.add_argument('-v', '--verbose',    required=False, help="Set to verbose", action="store_true")
   parser.add_argument('-q', '--quiet',    required=False, help="Set to quiet", action="store_true")
 
