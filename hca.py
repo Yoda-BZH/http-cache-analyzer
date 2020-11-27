@@ -347,6 +347,13 @@ class http_cache_analyzer:
     else:
       show_ok("Pragma is absent or empty. It's good. Pragma is useless since HTTP/1.1. ")
 
+    show_title("Cookie")
+    if 'Set-Cookie' in self.headers:
+      show_warning("Cookies are being defined. This may deactivates caching capabilities: '{}'".format(self.headers['Set-Cookie']))
+      self.score -= 30
+    else:
+      show_info("No cookie defined.")
+
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
