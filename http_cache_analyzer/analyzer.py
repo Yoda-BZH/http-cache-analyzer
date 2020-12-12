@@ -15,7 +15,6 @@ class analyzer():
 
   meaningfull_headers = ['Age', 'Cache-Control', 'ETag', 'Expires', 'Last-Modified', 'Pragma']
 
-
   def __init__(self):
     self.options = {}
     self.response = None
@@ -27,9 +26,17 @@ class analyzer():
     self.current_results_title = ""
 
   def get_results(self):
-    r = {}
+    r = {
+      'score': self.score,
+      'url': self.response.url,
+      'headers': dict(self.headers),
+      'http_code': self.response.status_code,
+      'is_redirected': len(self.response.history) > 0,
+    }
+    results_flattened = {}
     for i in self.results:
-      r.update(i.default())
+      results_flattened.update(i.default())
+    r['results'] = results_flattened
     return r
 
   def add_section(self, text):
