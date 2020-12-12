@@ -37,7 +37,6 @@ class parser:
       if elemtype in self.assets:
         for elem in self.assets[elemtype]:
           if elem[0:2] == '//' or elem[:4] == 'http':
-            #print("Skipping {}".format(elem))
             continue
           elem_analyzer = analyzer()
           url = "{}{}".format(self.parent_hca_url, elem.lstrip('/'))
@@ -82,7 +81,6 @@ class parser:
       if elemtype in self.hcas:
         for hca in self.hcas[elemtype]:
           r[elemtype].update({hca.response.url: hca.get_results()})
-        #r[elemtype] = [{hca.response.url: hca.get_results()} for hca in self.hcas[elemtype]]
     return r
 
   #def find_fonts(self):

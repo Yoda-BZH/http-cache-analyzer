@@ -210,7 +210,6 @@ class analyzer():
     self.add_section("Cache systems")
     cache_system_found = False
     for header_name, header_data in public_cache_headers.items():
-      #print("Trying {}".format(header_name))
       if header_name in self.response.headers:
         if 'provider' in header_data:
           self.add_result('ok', "Presence of header '{}': '{}'".format(header_name, self.response.headers[header_name]))
@@ -248,7 +247,6 @@ class analyzer():
     self.detect_public_cache()
 
     self.usefull_headers = self.filter_cache_headers()
-    #print(self.headers)
     self.analyze_headers()
 
   def analyze_header_cachecontrol(self, cachecontrol):
@@ -269,7 +267,7 @@ class analyzer():
     }
 
     tokens = cachecontrol.split(', ')
-    #print(tokens)
+
     for cache_control_value, ccv_modifier in cache_control_values_single.items():
       if cache_control_value in tokens:
         #self.add_result('ok', "{} is in cache-control".format(cache_control_value))
