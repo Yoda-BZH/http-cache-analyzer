@@ -28,7 +28,6 @@ class analyzer():
 
   def add_section(self, text):
     if len(self.current_results) > 0:
-      #print("previous ? from {} to {}".format(self.current_results_title, text))
       self.results.append(
         section(
           self.current_results_title,
@@ -36,13 +35,11 @@ class analyzer():
         )
       )
       self.current_results = []
-      #print(self.current_results)
-    #print("count sections : {}".format(len(self.results)))
+
     self.current_results_title = text
 
   def add_result(self, result_type, text, recommendation = None):
     self.current_results.append(result(result_type, text, recommendation))
-    #print("current results for section '{}': {}".format(self.current_results_title, len(self.current_results)))
 
   def finalize_results(self):
     if self.current_results_title == "":
@@ -76,7 +73,6 @@ class analyzer():
     return family
 
   def request(self, user_url, **options):
-    #print("REQUESTING " + user_url)
     self.add_section("HTTP Query")
 
     """

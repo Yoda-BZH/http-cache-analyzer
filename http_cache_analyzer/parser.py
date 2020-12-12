@@ -3,7 +3,6 @@ from .analyzer import analyzer
 import bs4
 
 class parser:
-  #parent_hca = None
   parent_hca_url = ""
   parent_hca_content = ""
   parent_hca_options = {}
@@ -38,31 +37,21 @@ class parser:
             continue
           elem_analyzer = analyzer()
           url = "{}{}".format(self.parent_hca_url, elem.lstrip('/'))
-          #print("going to request {}".format(url))
           elem_analyzer.request(url, options = self.parent_hca_options)
-          #print("Analyzing {}".format(elem))
           elem_analyzer.analyze()
           elem_analyzer.finalize_results()
           self.hcas[elemtype].append(elem_analyzer)
 
   def show_results(self):
-    #print("showing all result")
     for elemtype in self.hcas:
-      #print("showing all results for {}".format(elemtype))
       averages_for_type = []
       for elem in self.hcas[elemtype]:
-        #print("|")
-        #print("|")
-        #print("|")
-        #print("{}: {}".format(elem.response.url, elem.score))
         averages_for_type.append(elem.score)
       avg_type = (sum(averages_for_type) / len(averages_for_type))
       min_type = min(averages_for_type)
       max_type = max(averages_for_type)
 
       print("Average score for {}: {}, min: {}, max: {}".format(elemtype, avg_type, min_type, max_type))
-
-        #elem.show_results()
 
   def find_css(self):
     css = self.soup.find_all("link", {"rel": "stylesheet"})
