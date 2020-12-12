@@ -32,6 +32,7 @@ class analyzer():
       'headers': dict(self.headers),
       'http_code': self.response.status_code,
       'is_redirected': len(self.response.history) > 0,
+      'elapsed_ms': self.convert_timedeleta_to_ms(self.response.elapsed.microseconds)
     }
     results_flattened = {}
     for i in self.results:
@@ -128,7 +129,17 @@ class analyzer():
       redirect_strs = " -> ".join(redirect_strs)
       self.add_result('warning', "Request was redirected: {}".format(redirect_strs))
 
+    elapsed_ms = self.convert_timedeleta_to_ms(self.response.elapsed.microseconds)
+    if elapsed_ms < 500:
+      self.add_result('ok', 'The request took {} ms'.format(elapsed_ms))
+    else:
+      self.add_result('warning', 'The request took {} ms, this is too long'.format(elapsed_ms))
+      self.score -= 20
+
     return self.response
+
+  def convert_timedeleta_to_ms(self, value):
+    return round(value / 1000)
 
   def get_headers(self):
     return self.response.headers
