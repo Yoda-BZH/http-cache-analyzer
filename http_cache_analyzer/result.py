@@ -21,3 +21,6 @@ class result():
     elif self.rtype == "result":
       prefix = ""
     print("{}{}".format(prefix, self.text))
+
+  def default(self):
+    return {'type': self.rtype, 'text': self.text, 'recommendation': self.recommendation}

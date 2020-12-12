@@ -26,6 +26,9 @@ class analyzer():
     self.current_results = []
     self.current_results_title = ""
 
+  def get_results(self):
+    return self.results
+
   def add_section(self, text):
     if len(self.current_results) > 0:
       self.results.append(

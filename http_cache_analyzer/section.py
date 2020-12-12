@@ -1,7 +1,5 @@
 
 class section():
-  name = ""
-  results = []
 
   def __init__(self, name, results):
     self.name = name
@@ -12,3 +10,6 @@ class section():
     print("{} {} {}".format('-' * 8, self.name, '-' * (80 - 2 - len(self.name))))
     #show_title(self.name)
     [item.show_entry() for item in self.results]
+
+  def default(self):
+    return {self.name: self.results}

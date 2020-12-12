@@ -11,10 +11,10 @@ class parser:
   #bs_parser = "html.parser"
   #bs_parser = "lxml"
   bs_parser = "html5lib"
-
-  hcas = {}
+  elem_types = ['css', 'js', 'images']
 
   def __init__(self, parent_hca):
+    self.hcas = {}
     self.parent_hca_url = parent_hca.response.url
     self.parent_hca_options = parent_hca.options
     #self.soup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -30,7 +30,7 @@ class parser:
     """
     #self.find_fonts()
 
-    for elemtype in ['css', 'js', 'images']:
+    for elemtype in self.elem_types:
       if elemtype not in self.hcas:
         self.hcas[elemtype] = []
 
@@ -74,6 +74,16 @@ class parser:
   def find_images(self):
     imgs = self.soup.find_all('img', {"src": True})
     self.assets['images'] = [item.get('src') for item in imgs]
+
+  def get_results(self):
+    r = {}
+    for elemtype in self.elem_types:
+      r[elemtype] = {}
+      if elemtype in self.hcas:
+        for hca in self.hcas[elemtype]:
+          r[elemtype].update({hca.response.url: hca.get_results()})
+        #r[elemtype] = [{hca.response.url: hca.get_results()} for hca in self.hcas[elemtype]]
+    return r
 
   #def find_fonts(self):
   #  pass

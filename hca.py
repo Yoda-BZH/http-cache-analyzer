@@ -5,21 +5,12 @@
 #import sys
 import argparse
 
+"""
+for --out option, always write as json data
+"""
+import json
+
 import http_cache_analyzer
-
-def show_ok(text):
-  print("[OK] {}".format(text))
-
-def show_warning(text):
-  print("[!!] {}".format(text))
-
-def show_info(text):
-  print("[--] {}".format(text))
-
-def show_title(text):
-  print("")
-  print("{} {} {}".format('-' * 8, text, '-' * (80 - 2 - len(text))))
-
 
 #dns_cache = {}
 ## Capture a dict of hostname and their IPs to override with
@@ -52,6 +43,8 @@ if __name__ == "__main__":
   parser.add_argument('-A', '--user-agent', required=False, help="User agent to use", type=str, default="HTTP Cache Analyzer https://github.com/Yoda-BZH/http-cache-analyzer")
   parser.add_argument('-a', '--assets',     required=False, help="Parse all assets too", action="store_true")
 
+  parser.add_argument('-o', '--out',        required=False, help="Store results in given file", type=argparse.FileType('w'))
+
   group_ip = parser.add_mutually_exclusive_group()
   group_ip.add_argument('-4', '--ipv4', required=False, help="Resolve in ipv4 only", action="store_true")
   group_ip.add_argument('-6', '--ipv6', required=False, help="Resolve in ipv6 only", action="store_true")
@@ -65,8 +58,14 @@ if __name__ == "__main__":
     http_parser.parse()
 
     hca.show_results()
-    print("CALLING RESULTS")
+    #print("CALLING RESULTS")
     http_parser.show_results()
   else:
     hca.show_results()
 
+  if args.out:
+    r = {}
+    r['main'] = hca.get_results()
+    if args.assets:
+      r['assets'] = http_parser.get_results()
+    args.out.write(json.dumps(r, cls=http_cache_analyzer.jsonencoder))
