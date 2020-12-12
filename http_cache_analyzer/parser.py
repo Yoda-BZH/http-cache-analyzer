@@ -24,6 +24,10 @@ class parser:
     self.find_css()
     self.find_js()
     self.find_images()
+    """
+    fonts are mainly loaded by css
+    todo: parse css, extract images + fonts, add the to corresponding lists
+    """
     #self.find_fonts()
 
     for elemtype in ['css', 'js', 'images']:
@@ -52,6 +56,12 @@ class parser:
       max_type = max(averages_for_type)
 
       print("Average score for {}: {}, min: {}, max: {}".format(elemtype, avg_type, min_type, max_type))
+      if min_type != avg_type:
+        print("worse {} stats:".format(elemtype))
+        for elem in self.hcas[elemtype]:
+          if elem.score != min_type:
+            continue
+          elem.show_results()
 
   def find_css(self):
     css = self.soup.find_all("link", {"rel": "stylesheet"})
