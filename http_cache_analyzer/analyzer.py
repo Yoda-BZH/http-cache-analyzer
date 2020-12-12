@@ -9,25 +9,15 @@ from .section import section
 default_scheme = "https://"
 
 class analyzer():
-  #options = {}
-  #request = None
-  #response = None
-  #headers = {}
-  #usefull_headers = {}
   timeout = 30
   max_time = 30
   connect_timeout = 30
 
-  #score = 50
   meaningfull_headers = ['Age', 'Cache-Control', 'ETag', 'Expires', 'Last-Modified', 'Pragma']
 
-  #results = []
-  #current_results = []
-  #current_results_title = ""
 
   def __init__(self):
     self.options = {}
-    #self.request = None
     self.response = None
     self.headers = {}
     self.usefull_headers = {}
