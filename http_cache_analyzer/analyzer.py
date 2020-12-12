@@ -109,7 +109,7 @@ class analyzer():
       'User-Agent': self.options['user_agent'],
     }
 
-    self.add_result('ok', "Requesting url {}".format(url))
+    self.add_result('info', "Requesting url {}".format(url))
     self.response = requests.get(url, headers = request_headers)
     if self.response.status_code > 299:
       self.add_result('warning', "HTTP Status code is {}".format(self.response.status_code))
@@ -209,7 +209,7 @@ class analyzer():
               cache_system_found = True
 
     if cache_system_found == False:
-      self.add_result('ok', "No caching system found")
+      self.add_result('info', "No caching system found")
     else:
       self.score += 20
 
@@ -228,7 +228,7 @@ class analyzer():
     self.headers = self.get_headers()
     self.add_section("HTTP Header list")
     for key, value in self.headers.items():
-      self.add_result('ok', "{}: {}".format(key, value))
+      self.add_result('info', "{}: {}".format(key, value))
 
     self.detect_public_cache()
 
@@ -268,7 +268,7 @@ class analyzer():
       for token in tokens:
         if cache_control_value in token:
           (ccv, seconds) = token.split("=")
-          self.add_result('ok', "Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
+          self.add_result('info', "Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
           if int(seconds) <= 0:
             self.add_result('warning', "Cache-Control has {} value to 0 or lower, lowering the score by {}".format(ccv, ccv_modifier))
           else:
@@ -288,7 +288,7 @@ class analyzer():
       self.add_result('ok', "Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
       self.score += 10
     else:
-      self.add_result('ok', "Age is absent.")
+      self.add_result('info', "Age is absent.")
 
     """
     Cache-Control
@@ -341,7 +341,7 @@ class analyzer():
       if 'Cache-Control' in self.usefull_headers:
         self.add_result('ok', "Expires is absent, but Cache-Control is present, which is good.")
       else:
-        self.add_result('ok', "Expires is absent. It's ok")
+        self.add_result('info', "Expires is absent. It's ok")
 
     """
     Last-Modified
@@ -351,7 +351,7 @@ class analyzer():
       self.add_result('ok', "Last-Modified is present, current value: '{}'".format(self.usefull_headers['Last-Modified']))
       self.score += 5
     else:
-      self.add_result('ok', "Last-Modified is absent, it's okay")
+      self.add_result('info', "Last-Modified is absent, it's okay")
 
     """
     Pragma
