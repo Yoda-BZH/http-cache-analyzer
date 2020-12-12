@@ -27,7 +27,10 @@ class analyzer():
     self.current_results_title = ""
 
   def get_results(self):
-    return self.results
+    r = {}
+    for i in self.results:
+      r.update(i.default())
+    return r
 
   def add_section(self, text):
     if len(self.current_results) > 0:
