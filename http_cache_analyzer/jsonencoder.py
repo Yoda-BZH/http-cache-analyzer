@@ -9,4 +9,4 @@ class jsonencoder(json.JSONEncoder):
       return o.default()
     if isinstance(o, result):
       return o.default()
-    print(o)
+    raise Exception("Unable to JSONEncode object to type {}".format(type(o))
