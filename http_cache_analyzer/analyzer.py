@@ -24,6 +24,7 @@ class analyzer():
     self.results = []
     self.current_results = []
     self.current_results_title = ""
+    self.elapsed_ms = []
 
   def get_results(self):
     r = {
@@ -121,19 +122,22 @@ class analyzer():
     if self.response.url.rstrip('/') != url.rstrip('/'):
       self.add_result('warning', "Request was redirected to {}".format(self.response.url))
 
+    self.elapsed_ms.append(self.convert_timedeleta_to_ms(self.response.elapsed.microseconds))
+
     if len(self.response.history) > 0:
       redirect_strs = [url]
       for history in self.response.history:
         redirect_strs.append(history.url)
+        self.elapsed_ms.append(self.convert_timedeleta_to_ms(history.elapsed.microseconds))
       redirect_strs.append(self.response.url)
       redirect_strs = " -> ".join(redirect_strs)
       self.add_result('warning', "Request was redirected: {}".format(redirect_strs))
 
-    elapsed_ms = self.convert_timedeleta_to_ms(self.response.elapsed.microseconds)
-    if elapsed_ms < 500:
-      self.add_result('ok', 'The request took {} ms'.format(elapsed_ms))
+    total_elapsed = sum(self.elapsed_ms)
+    if total_elapsed < 500:
+      self.add_result('ok', 'The request took {} ms'.format(total_elapsed))
     else:
-      self.add_result('warning', 'The request took {} ms, this is too long'.format(elapsed_ms))
+      self.add_result('warning', 'The request took {} ms, this is too long'.format(total_elapsed))
       self.score -= 20
 
     return self.response
