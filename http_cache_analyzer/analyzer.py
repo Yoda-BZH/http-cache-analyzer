@@ -8,6 +8,25 @@ from .section import section
 
 default_scheme = "https://"
 
+class score():
+  http_code = 30
+  transfer_speed = 20
+  cache_control_must_revalidate = -1
+  cache_control_must_no_cache = -20
+  cache_control_must_no_store = -20
+  cache_control_must_no_transform = 5
+  cache_control_public = 5
+  cache_control_private = -5
+  cache_control_proxy_revalidate = -5
+  cache_control_max_age = 5
+  cache_control_s_maxage = 5
+  age = 10
+  etag = 10
+  expires = 5
+  last_modified = 10
+  pragma = -5
+  no_cookies = 30
+
 class analyzer():
   timeout = 30
   max_time = 30
@@ -20,12 +39,25 @@ class analyzer():
     self.response = None
     self.headers = {}
     self.usefull_headers = {}
-    self.score = 50
+    self.score = 0
     self.results = []
     self.current_results = []
     self.current_results_title = ""
     self.elapsed_ms = []
     self.document_size = 0
+    self.cache_control_values_single = {
+      "must-revalidate": score.cache_control_must_revalidate,
+      "no-cache": score.cache_control_must_no_cache,
+      "no-store": score.cache_control_must_no_store,
+      "no-transform": score.cache_control_must_no_transform,
+      "public": score.cache_control_public,
+      "private": score.cache_control_private,
+      "proxy-revalidate": score.cache_control_proxy_revalidate,
+    }
+    self.cache_control_expirations = {
+      "max-age=": score.cache_control_max_age,
+      "s-maxage=": score.cache_control_s_maxage,
+    }
 
   def get_results(self):
     r = {
@@ -54,8 +86,9 @@ class analyzer():
 
     self.current_results_title = text
 
-  def add_result(self, result_type, text, recommendation = None):
-    self.current_results.append(result(result_type, text, recommendation))
+  def add_result(self, result_type, text, recommendation = None, score = 0):
+    self.current_results.append(result(result_type, text, recommendation, score))
+    self.score += score
 
   def finalize_results(self):
     if self.current_results_title == "":
@@ -116,9 +149,8 @@ class analyzer():
     self.response = requests.get(url, headers = request_headers)
     if self.response.status_code > 299:
       self.add_result('warning', "HTTP Status code is {}".format(self.response.status_code))
-      self.score -= 40
     else:
-      self.add_result('ok', "HTTP Status code is {}".format(self.response.status_code))
+      self.add_result('ok', "HTTP Status code is {}".format(self.response.status_code), score = score.http_code)
 
     if self.response.url.rstrip('/') != url.rstrip('/'):
       self.add_result('warning', "Request was redirected to {}".format(self.response.url))
@@ -136,10 +168,9 @@ class analyzer():
 
     total_elapsed = sum(self.elapsed_ms)
     if total_elapsed < 500:
-      self.add_result('ok', 'The request took {} ms'.format(total_elapsed))
+      self.add_result('ok', 'The request took {} ms'.format(total_elapsed), score = score.transfer_speed)
     else:
       self.add_result('warning', 'The request took {} ms, this is too long'.format(total_elapsed))
-      self.score -= 20
 
     """
     check for the request length
@@ -248,7 +279,7 @@ class analyzer():
     if cache_system_found == False:
       self.add_result('info', "No caching system found")
     else:
-      self.score += 20
+      self.add_result('info', "A cache system was found", score = 20)
 
   def filter_cache_headers(self):
     h = {}
@@ -273,55 +304,36 @@ class analyzer():
     self.analyze_headers()
 
   def analyze_header_cachecontrol(self, cachecontrol):
-    score_modifier = 0
-
-    cache_control_values_single = {
-      "must-revalidate": -1,
-      "no-cache": -20,
-      "no-store": -20,
-      "no-transform": 5,
-      "public": 5,
-      "private": -5,
-      "proxy-revalidate": -5,
-    }
-    cache_control_expirations = {
-      "max-age=": 5,
-      "s-maxage=": 5,
-    }
 
     tokens = cachecontrol.split(', ')
 
     has_private = False
     has_public = False
-    for cache_control_value, ccv_modifier in cache_control_values_single.items():
+    for cache_control_value, ccv_modifier in self.cache_control_values_single.items():
       if cache_control_value in tokens:
         #self.add_result('ok', "{} is in cache-control".format(cache_control_value))
         if cache_control_value == 'private':
           has_private = True
         if cache_control_value == 'public':
           has_public = True
-        score_modifier += ccv_modifier
-        if score_modifier > 0:
-          self.add_result('ok', "Cache-Control has {}, adding {} points".format(cache_control_value, ccv_modifier))
+
+        if ccv_modifier > 0:
+          self.add_result('ok', "Cache-Control has {}".format(cache_control_value), score = ccv_modifier)
         else:
-          self.add_result('warning', "Cache-Control has {}, removing {} points".format(cache_control_value, ccv_modifier))
+          self.add_result('warning', "Cache-Control has {}".format(cache_control_value), score = ccv_modifier)
 
     if has_private and has_public:
       self.add_result('warning', "Cache-Control has bot '{}' and '{}'. In this situation, only '{}' is kept !".format('private', 'public', 'private'))
 
-    for cache_control_value, ccv_modifier in cache_control_expirations.items():
+    for cache_control_value, ccv_modifier in self.cache_control_expirations.items():
       for token in tokens:
         if cache_control_value in token:
           (ccv, seconds) = token.split("=")
           self.add_result('info', "Cache-Control: token '{}' has value '{}'.".format(ccv, str(seconds)))
           if int(seconds) <= 0:
-            self.add_result('warning', "Cache-Control has {} value to 0 or lower, lowering the score by {}".format(ccv, ccv_modifier))
+            self.add_result('warning', "Cache-Control has {} value to 0 or lower".format(ccv))
           else:
-            self.add_result('ok', "Cache-Control has {} value to 0 or higher, adding {} points to the score".format(ccv, ccv_modifier))
-            ccv_modifier = -ccv_modifier
-          score_modifier += ccv_modifier
-
-    return score_modifier
+            self.add_result('ok', "Cache-Control has {} value to 0 or higher".format(ccv), score = ccv_modifier)
 
   def analyze_headers(self):
 
@@ -330,8 +342,7 @@ class analyzer():
     """
     self.add_section("Header Age")
     if 'Age' in self.usefull_headers:
-      self.add_result('ok', "Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])))
-      self.score += 10
+      self.add_result('ok', "Age is present, current value: '{}'".format(str(self.usefull_headers['Age'])), score = score.age)
     else:
       self.add_result('info', "Age is absent.")
 
@@ -341,13 +352,11 @@ class analyzer():
     self.add_section("Header Cache-Control")
     if 'Cache-Control' in self.usefull_headers:
       self.add_result('ok', "Cache-Control ok, current value: '{}'".format(self.usefull_headers['Cache-Control']))
-      self.score += 30
-      self.score += self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
+      self.analyze_header_cachecontrol(self.usefull_headers['Cache-Control'])
       #if 'Age' not in self.usefull_headers:
       #  self.add_result('warning', "But wait, age is not present ?")
     else:
       self.add_result('warning', "Cache-Control is absent. Default value is '{}', which deactivate all cache mecanismes".format('no-store, no-cache'))
-      self.score -= 30
 
     """
     ETag
@@ -355,11 +364,9 @@ class analyzer():
     self.add_section("Header ETag")
     if 'ETag' in self.usefull_headers:
       etag = self.usefull_headers['ETag'].strip('"\'')
-      self.score += 10
-      self.add_result('ok', "ETag is present, current value: {}.".format(etag))
+      self.add_result('ok', "ETag is present, current value: {}.".format(etag), score = score.etag)
       if 'Cache-Control' not in self.usefull_headers:
-        self.add_result('info', 'Cache-Control is not used, but Etag is. Giving points back.')
-        self.score += 30
+        self.add_result('info', 'Cache-Control is not used, but Etag is.')
 
     else:
       etag_strs = ["ETag is absent."]
@@ -369,7 +376,6 @@ class analyzer():
       else:
         etag_strs.append("Cache-Control is absent too. No cache can be made.")
         self.add_result('warning', " ".join(etag_strs))
-        self.score -= 10
 
     """
     Expires
@@ -379,8 +385,7 @@ class analyzer():
       if 'Cache-Control' in self.usefull_headers:
         self.add_result('ok', "Expires is present, but it's value '{}' is ignored since Cache-Control is present".format(self.usefull_headers['Expires']))
       else:
-        self.add_result('ok', "Expires ok, '{}'".format(self.usefull_headers['Expires']))
-        self.score += 5
+        self.add_result('ok', "Expires ok, '{}'".format(self.usefull_headers['Expires']), score = score.expires)
     else:
       if 'Cache-Control' in self.usefull_headers:
         self.add_result('ok', "Expires is absent, but Cache-Control is present, which is good.")
@@ -392,8 +397,7 @@ class analyzer():
     """
     self.add_section("Header Last-Modified")
     if 'Last-Modified' in self.usefull_headers:
-      self.add_result('ok', "Last-Modified is present, current value: '{}'".format(self.usefull_headers['Last-Modified']))
-      self.score += 5
+      self.add_result('ok', "Last-Modified is present, current value: '{}'".format(self.usefull_headers['Last-Modified']), score = score.last_modified)
     else:
       self.add_result('info', "Last-Modified is absent, it's okay")
 
@@ -402,8 +406,7 @@ class analyzer():
     """
     self.add_section("Header Pragma")
     if 'Pragma' in self.usefull_headers and self.usefull_headers['Pragma'] != "":
-      self.add_result('ok', "Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
-      self.score -= 5
+      self.add_result('ok', "Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']), score = score.pragma)
     else:
       self.add_result('ok', "Pragma is absent or empty. It's good. Pragma is useless since HTTP/1.1. ")
 
@@ -413,7 +416,6 @@ class analyzer():
     self.add_section("Cookie")
     if 'Set-Cookie' in self.headers:
       self.add_result('warning', "Cookies are being defined. This may deactivates caching capabilities: '{}'".format(self.headers['Set-Cookie']))
-      self.score -= 30
     else:
-      self.add_result('ok', "No cookie defined.")
+      self.add_result('ok', "No cookie defined.", score = score.no_cookies)
 
