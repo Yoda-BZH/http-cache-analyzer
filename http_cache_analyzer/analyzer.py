@@ -357,6 +357,9 @@ class analyzer():
       etag = self.usefull_headers['ETag'].strip('"\'')
       self.score += 10
       self.add_result('ok', "ETag is present, current value: {}.".format(etag))
+      if 'Cache-Control' not in self.usefull_headers:
+        self.add_result('info', 'Cache-Control is not used, but Etag is. Giving points back.')
+        self.score += 30
 
     else:
       etag_strs = ["ETag is absent."]
