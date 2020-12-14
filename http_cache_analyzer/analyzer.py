@@ -94,7 +94,7 @@ class analyzer():
   def add_result(self, result_type, text, recommendation = None, score = 0):
     self.current_results.append(result(result_type, text, recommendation, score))
     self.score += score
-    print('score: {} ({}) for {}'.format(self.score, "+" + str(score) if score > 0 else score, text))
+    #print('score: {} ({}) for {}'.format(self.score, "+" + str(score) if score > 0 else score, text))
 
   def finalize_results(self):
     if self.current_results_title == "":
