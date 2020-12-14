@@ -9,23 +9,28 @@ from .section import section
 default_scheme = "https://"
 
 class score():
-  http_code = 30
-  transfer_speed = 20
+  http_code = 10
+  transfer_speed_150ms = 20
+  transfer_speed_250ms = 10
+  transfer_speed = 5
   cache_control_must_revalidate = -1
   cache_control_must_no_cache = -20
   cache_control_must_no_store = -20
   cache_control_must_no_transform = 5
   cache_control_public = 5
-  cache_control_private = -5
-  cache_control_proxy_revalidate = -5
-  cache_control_max_age = 5
-  cache_control_s_maxage = 5
+  cache_control_private = -10
+  cache_control_proxy_revalidate = 5
+  cache_control_max_age = 10
+  cache_control_s_maxage = 10
   age = 10
   etag = 10
+  no_etag_but_cache_control = 5
   expires = 5
   last_modified = 10
-  pragma = -5
-  no_cookies = 30
+  no_pragma = 10
+  no_cookies = 10
+  cache_system = 10
+  compression = 5
 
 class analyzer():
   timeout = 30
@@ -89,6 +94,7 @@ class analyzer():
   def add_result(self, result_type, text, recommendation = None, score = 0):
     self.current_results.append(result(result_type, text, recommendation, score))
     self.score += score
+    print('score: {} ({}) for {}'.format(self.score, "+" + str(score) if score > 0 else score, text))
 
   def finalize_results(self):
     if self.current_results_title == "":
@@ -168,7 +174,12 @@ class analyzer():
 
     total_elapsed = sum(self.elapsed_ms)
     if total_elapsed < 500:
-      self.add_result('ok', 'The request took {} ms'.format(total_elapsed), score = score.transfer_speed)
+      if total_elapsed < 150:
+        self.add_result('ok', 'The request took {} ms'.format(total_elapsed), score = score.transfer_speed_150ms)
+      elif total_elapsed < 250:
+        self.add_result('ok', 'The request took {} ms'.format(total_elapsed), score = score.transfer_speed_250ms)
+      else:
+        self.add_result('ok', 'The request took {} ms'.format(total_elapsed), score = score.transfer_speed)
     else:
       self.add_result('warning', 'The request took {} ms, this is too long'.format(total_elapsed))
 
@@ -180,6 +191,19 @@ class analyzer():
     else:
       data_length = len(self.response.text)
     self.document_size = data_length
+
+    if 'Content-Encoding' in self.response.headers and self.response.headers['Content-Encoding'] in ['gzip', 'compress', 'deflate', 'br']:
+      """
+      FIXME: handle mixed compression
+
+      https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding#Syntax
+      // Multiple, in the order in which they were applied
+      Content-Encoding: gzip, identity
+      Content-Encoding: deflate, gzip
+      """
+      self.add_result('ok', 'Request is compressed with {}'.format(self.response.headers['Content-Encoding']), score = score.compression)
+    else:
+      self.add_result('info', 'Request is not compressed.')
 
     data_length_format = 'bytes'
     if data_length < 1048576: # 1024 * 1024
@@ -279,7 +303,7 @@ class analyzer():
     if cache_system_found == False:
       self.add_result('info', "No caching system found")
     else:
-      self.add_result('info', "A cache system was found", score = 20)
+      self.add_result('ok', "A cache system was found", score = score.cache_system)
 
   def filter_cache_headers(self):
     h = {}
@@ -388,7 +412,7 @@ class analyzer():
         self.add_result('ok', "Expires ok, '{}'".format(self.usefull_headers['Expires']), score = score.expires)
     else:
       if 'Cache-Control' in self.usefull_headers:
-        self.add_result('ok', "Expires is absent, but Cache-Control is present, which is good.")
+        self.add_result('ok', "Expires is absent, but Cache-Control is present, which is good.", score = score.no_etag_but_cache_control)
       else:
         self.add_result('info', "Expires is absent. It's ok")
 
@@ -406,9 +430,9 @@ class analyzer():
     """
     self.add_section("Header Pragma")
     if 'Pragma' in self.usefull_headers and self.usefull_headers['Pragma'] != "":
-      self.add_result('ok', "Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']), score = score.pragma)
+      self.add_result('ok', "Pragma: Pragma is useless since HTTP/1.1. Current value: '{}'".format(self.usefull_headers['Pragma']))
     else:
-      self.add_result('ok', "Pragma is absent or empty. It's good. Pragma is useless since HTTP/1.1. ")
+      self.add_result('ok', "Pragma is absent or empty. It's good. Pragma is useless since HTTP/1.1.", score = score.no_pragma)
 
     """
     cookies
