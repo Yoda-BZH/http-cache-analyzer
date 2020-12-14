@@ -1,6 +1,8 @@
 
 from .analyzer import analyzer
 import bs4
+import urllib
+import os
 
 class parser:
   parent_hca_url = ""
@@ -30,6 +32,13 @@ class parser:
     """
     #self.find_fonts()
 
+    url_tokens = urllib.parse.urlparse(self.parent_hca_url)
+    url_tokens_path = url_tokens.path
+    if url_tokens_path[-1] != '/' and url_tokens_path != '/':
+      url_tokens_path = os.path.dirname(url_tokens_path)
+    baseurl_main = '{}://{}'.format(url_tokens.scheme, url_tokens.netloc)
+    baseurl_dir = '{}://{}{}'.format(url_tokens.scheme, url_tokens.netloc, url_tokens_path).rstrip('/')
+
     for elemtype in self.elem_types:
       if elemtype not in self.hcas:
         self.hcas[elemtype] = []
@@ -39,7 +48,11 @@ class parser:
           if elem[0:2] == '//' or elem[:4] == 'http':
             continue
           elem_analyzer = analyzer()
-          url = "{}{}".format(self.parent_hca_url, elem.lstrip('/'))
+          if elem[0] == '/':
+            url = "{}/{}".format(baseurl_main, elem.lstrip('/'))
+          else:
+            url = "{}/{}".format(baseurl_dir, elem.lstrip('/'))
+          #url = "{}{}".format(baseurl, elem.lstrip('/'))
           elem_analyzer.request(url, options = self.parent_hca_options)
           elem_analyzer.analyze()
           elem_analyzer.finalize_results()
@@ -48,6 +61,9 @@ class parser:
   def show_results(self):
     for elemtype in self.hcas:
       averages_for_type = []
+      if not self.hcas[elemtype]:
+        print("No {} element, skipping".format(elemtype))
+        continue
       for elem in self.hcas[elemtype]:
         averages_for_type.append(elem.score)
       avg_type = (sum(averages_for_type) / len(averages_for_type))
