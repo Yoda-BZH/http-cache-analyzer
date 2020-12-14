@@ -258,7 +258,7 @@ class analyzer():
       "no-store": -20,
       "no-transform": 5,
       "public": 5,
-      "private": 5,
+      "private": -5,
       "proxy-revalidate": -5,
     }
     cache_control_expirations = {
@@ -268,14 +268,23 @@ class analyzer():
 
     tokens = cachecontrol.split(', ')
 
+    has_private = False
+    has_public = False
     for cache_control_value, ccv_modifier in cache_control_values_single.items():
       if cache_control_value in tokens:
         #self.add_result('ok', "{} is in cache-control".format(cache_control_value))
+        if cache_control_value == 'private':
+          has_private = True
+        if cache_control_value == 'public':
+          has_public = True
         score_modifier += ccv_modifier
         if score_modifier > 0:
           self.add_result('ok', "Cache-Control has {}, adding {} points".format(cache_control_value, ccv_modifier))
         else:
           self.add_result('warning', "Cache-Control has {}, removing {} points".format(cache_control_value, ccv_modifier))
+
+    if has_private and has_public:
+      self.add_result('warning', "Cache-Control has bot '{}' and '{}'. In this situation, only '{}' is kept !".format('private', 'public', 'private'))
 
     for cache_control_value, ccv_modifier in cache_control_expirations.items():
       for token in tokens:
