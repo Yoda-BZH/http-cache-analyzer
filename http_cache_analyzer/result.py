@@ -28,7 +28,7 @@ class result():
       #  s += " This does not affect the final score."
       #else:
       if self.score != 0:
-        s += " This affets the score by {}".format('+' + str(self.score) if self.score > 0 else self.score)
+        s += " This affects the score by {}".format('+' + str(self.score) if self.score > 0 else self.score)
     print(s)
 
   def default(self):
