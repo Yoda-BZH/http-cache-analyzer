@@ -332,12 +332,8 @@ class analyzer():
     self.add_section("Header ETag")
     if 'ETag' in self.usefull_headers:
       etag = self.usefull_headers['ETag'].strip('"\'')
-      etag_strs = ["ETag is present, current value: {}.".format(etag)]
       self.score += 10
-      if etag[-5:] == "-gzip":
-        self.score += 5
-        etag_strs.append("Etag is gzipped, bonus points")
-      self.add_result('ok', " ".join(etag_strs))
+      self.add_result('ok', "ETag is present, current value: {}.".format(etag))
 
     else:
       etag_strs = ["ETag is absent."]
