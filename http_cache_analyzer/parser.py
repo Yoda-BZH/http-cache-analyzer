@@ -59,6 +59,7 @@ class parser:
           self.hcas[elemtype].append(elem_analyzer)
 
   def show_results(self):
+    assets_size = 0
     for elemtype in self.hcas:
       averages_for_type = []
       if not self.hcas[elemtype]:
@@ -66,6 +67,7 @@ class parser:
         continue
       for elem in self.hcas[elemtype]:
         averages_for_type.append(elem.score)
+        assets_size += elem.document_size
       avg_type = (sum(averages_for_type) / len(averages_for_type))
       min_type = min(averages_for_type)
       max_type = max(averages_for_type)
@@ -77,6 +79,18 @@ class parser:
           if elem.score != min_type:
             continue
           elem.show_results()
+
+    assets_format = 'bytes'
+    if assets_size < 1048576: # 1024 * 1024
+      assets_size /= 1024
+      assets_format = 'kilobytes'
+    elif assets_size < 1073741824: # 1024 * 1024 * 1024
+      assets_size /= 1048576
+      assets_format = 'megabytes'
+    else:
+      assets_size /= 1073741824
+      assets_format = 'gigabytes'
+    print("All assets size: {} {}".format(round(assets_size, 2), assets_format))
 
   def find_css(self):
     css = self.soup.find_all("link", {"rel": "stylesheet"})

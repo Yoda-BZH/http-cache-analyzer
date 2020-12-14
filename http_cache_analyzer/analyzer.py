@@ -25,6 +25,7 @@ class analyzer():
     self.current_results = []
     self.current_results_title = ""
     self.elapsed_ms = []
+    self.document_size = 0
 
   def get_results(self):
     r = {
@@ -139,6 +140,28 @@ class analyzer():
     else:
       self.add_result('warning', 'The request took {} ms, this is too long'.format(total_elapsed))
       self.score -= 20
+
+    """
+    check for the request length
+    """
+    if 'Content-Length' in self.response.headers:
+      data_length = int(self.response.headers['Content-Length'])
+    else:
+      data_length = len(self.response.text)
+    self.document_size = data_length
+
+    data_length_format = 'bytes'
+    if data_length < 1048576: # 1024 * 1024
+      data_length /= 1024
+      data_length_format = 'kilobytes'
+    elif data_length < 1073741824:
+      data_length /= 1048576
+      data_length_format = 'megabytes'
+    else:
+      data_length /= 1073741824
+      data_length_format = 'gigabytes'
+    self.add_result('info', 'Document size: {} {}'.format(round(data_length, 2), data_length_format))
+    #print("content length: {}, raw length: {}".format(self.response.headers['Content-Length'], len(self.response.text)))
 
     return self.response
 
@@ -381,6 +404,9 @@ class analyzer():
     else:
       self.add_result('ok', "Pragma is absent or empty. It's good. Pragma is useless since HTTP/1.1. ")
 
+    """
+    cookies
+    """
     self.add_section("Cookie")
     if 'Set-Cookie' in self.headers:
       self.add_result('warning', "Cookies are being defined. This may deactivates caching capabilities: '{}'".format(self.headers['Set-Cookie']))
