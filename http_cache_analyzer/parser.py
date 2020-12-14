@@ -19,7 +19,6 @@ class parser:
     self.hcas = {}
     self.parent_hca_url = parent_hca.response.url
     self.parent_hca_options = parent_hca.options
-    #self.soup = bs4.BeautifulSoup(response.text, "html.parser")
     self.soup = bs4.BeautifulSoup(parent_hca.response.text, self.bs_parser)
 
   def parse(self):
@@ -72,13 +71,21 @@ class parser:
       min_type = min(averages_for_type)
       max_type = max(averages_for_type)
 
-      print("Average score for {}: {}, min: {}, max: {}".format(elemtype, avg_type, min_type, max_type))
+      print("Average score for {}: {}, min: {}, max: {}".format(elemtype, round(avg_type, 2), round(min_type, 2), round(max_type, 2)))
       if min_type != avg_type:
-        print("worse {} stats:".format(elemtype))
+        print("Worst {} stats:".format(elemtype))
         for elem in self.hcas[elemtype]:
+          """
+          skip all non-lowest scores results
+          """
           if elem.score != min_type:
             continue
           elem.show_results()
+          """
+          show only the first worst assets of this type
+          if several assets have the same score, all of them will be displayed
+          """
+          break
 
     assets_format = 'bytes'
     if assets_size < 1048576: # 1024 * 1024

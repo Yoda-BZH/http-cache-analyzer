@@ -22,8 +22,10 @@ class score():
   cache_control_proxy_revalidate = 5
   cache_control_max_age = 10
   cache_control_s_maxage = 10
+  cache_control_value_oneyear = -10
   age = 10
   etag = 10
+  etag_weak = 5
   no_etag_but_cache_control = 5
   expires = 5
   last_modified = 10
@@ -358,6 +360,8 @@ class analyzer():
             self.add_result('warning', "Cache-Control has {} value to 0 or lower".format(ccv))
           else:
             self.add_result('ok', "Cache-Control has {} value to 0 or higher".format(ccv), score = ccv_modifier)
+            if int(seconds) >= 31536000: # one year
+              self.add_result('warning', 'Cache-Control {} is too high ({}), more than a year'.format(ccv, seconds), score = score.cache_control_value_oneyear)
 
   def analyze_headers(self):
 
@@ -388,7 +392,10 @@ class analyzer():
     self.add_section("Header ETag")
     if 'ETag' in self.usefull_headers:
       etag = self.usefull_headers['ETag'].strip('"\'')
-      self.add_result('ok', "ETag is present, current value: {}.".format(etag), score = score.etag)
+      if etag[0:2] == 'W/':
+        self.add_result('warning', 'Etag is present but is using a weak validator: "{}"'.format(etag), score = score.etag_weak, recommendation = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests#Weak_validation")
+      else:
+        self.add_result('ok', "ETag is present, current value: {}.".format(etag), score = score.etag)
       if 'Cache-Control' not in self.usefull_headers:
         self.add_result('info', 'Cache-Control is not used, but Etag is.')
 

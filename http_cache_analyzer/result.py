@@ -29,6 +29,8 @@ class result():
       #else:
       if self.score != 0:
         s += " This affects the score by {}".format('+' + str(self.score) if self.score > 0 else self.score)
+    elif self.score:
+      print('Had a score of {} but rtype is not "ok" nor "warning": {} - {}'.format(self.score, self.rtype, self.text))
     print(s)
 
   def default(self):
