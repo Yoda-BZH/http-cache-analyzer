@@ -13,7 +13,7 @@ class score():
   transfer_speed_150ms = 20
   transfer_speed_250ms = 10
   transfer_speed = 5
-  cache_control_must_revalidate = -1
+  cache_control_must_revalidate = 0
   cache_control_must_no_cache = -20
   cache_control_must_no_store = -20
   cache_control_must_no_transform = 5
