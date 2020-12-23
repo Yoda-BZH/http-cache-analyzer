@@ -28,6 +28,7 @@ class parser:
     """
     fonts are mainly loaded by css
     todo: parse css, extract images + fonts, add the to corresponding lists
+          problem, unable to know which css rules are actually applied.
     """
     #self.find_fonts()
 
