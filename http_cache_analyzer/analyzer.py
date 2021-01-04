@@ -34,6 +34,22 @@ class score():
   cache_system = 10
   compression = 5
 
+class recommendations():
+  transfer_speed = "Transfert time should be kept under 500ms"
+  cache_control_no_must_revalidate = "'must-revalidate' may be used to avoids serving stale/outdated cache. This forces the proxy-cache/browser to force-fetch content"
+  cache_control_no_cache = ""
+  cache_control_no_store = "'no-store' forces responses to never be stored in any cache (proxy-cache nor browser). This should not be used."
+  cache_control_private = "'private' does not allow proxy-caches (varnish, cloudfront, etc) to actually store/cache the response. Only the browser is allowed. This doesn't really help performances."
+  no_etag = "ETag, specially on assets, provides a better cache method (through content validation). https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag"
+  etag_weak "ETag is provided, but with a weak indicator (it starts with W/). Weak validator doesn't work with byte range request. https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag#Directives"
+  expires = "Expires is used only if cache-control is absent, or lacks 'max-age' or 's-maxage'. Cache-Control is prefered. https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires"
+  no_pragma "'pragma' can be removed as no browser still uses HTTP 1.0 ."
+  no_cookies = "Cookies, specially on the homepage, reduces the amount of cacheable content or disables it completely. If needed, load user-specific content with javascript/ajax, and use a placeholder while waiting"
+  no_cache_system = "No cache system is detected. They help handle heavy trafic and releive webservers. They should be used. However, they may hide their presence."
+  cache_system = "Headers indicating the presence of a cache-system are generally not needed and may be removed."
+  no_compression = "Compression reduces download times. 'deflate' or 'gzip' compression algorithmes are cpu-cheap and should be activated on reverse proxys (nginx, cloudfront, azure cdn, etc), or the webserver itself if there's some cpu-time available"
+
+
 class analyzer():
   timeout = 30
   max_time = 30
