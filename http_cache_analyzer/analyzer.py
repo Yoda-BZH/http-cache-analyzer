@@ -376,7 +376,7 @@ class analyzer():
             self.add_result('warning', "Cache-Control has {} value to 0 or lower".format(ccv))
           else:
             self.add_result('ok', "Cache-Control has {} value to 0 or higher".format(ccv), score = ccv_modifier)
-            if int(seconds) >= 31536000: # one year
+            if int(seconds) > 31536000: # one year
               self.add_result('warning', 'Cache-Control {} is too high ({}), more than a year'.format(ccv, seconds), score = score.cache_control_value_oneyear)
 
   def analyze_headers(self):
