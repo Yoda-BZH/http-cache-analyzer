@@ -45,6 +45,8 @@ class parser:
 
       if elemtype in self.assets:
         for elem in self.assets[elemtype]:
+          if not elem:
+            continue
           if elem[0:2] == '//' or elem[:4] == 'http':
             continue
           elem_analyzer = analyzer()
