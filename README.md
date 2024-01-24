@@ -12,7 +12,7 @@ Currenlty checked HTTP headers:
 * ETag
 * Cookies
 
-It will also try to detect avec caching tools (varnish) or public caches (AWS
+It will also try to detect any caching tools (varnish) or public caches (AWS
 Cloudfront, Cloudflare, GCP, etc)
 
 Findinds will are presented and detailed.
