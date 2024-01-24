@@ -33,6 +33,26 @@ Usage:
 ./hca.py https://www.example.com/assets/app.js
 ```
 
+```
+$ ./hca.py --help
+usage: hca.py [-h] [-v] [-q] [-A USER_AGENT] [-a] [-o OUT] [-4 | -6] url
+
+positional arguments:
+  url                   URL to check
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set to verbose
+  -q, --quiet           Set to quiet
+  -A USER_AGENT, --user-agent USER_AGENT
+                        User agent to use
+  -a, --assets          Parse all assets too
+  -o OUT, --out OUT     Store results in given file
+  -4, --ipv4            Resolve in ipv4 only
+  -6, --ipv6            Resolve in ipv6 only
+
+```
+
 Exemple (may not be up to date):
 
 ```
