@@ -15,7 +15,7 @@ Currenlty checked HTTP headers:
 It will also try to detect any caching tools (varnish) or public caches (AWS
 Cloudfront, Cloudflare, GCP, etc)
 
-Findinds will are presented and detailed.
+Findings are presented and detailed.
 
 TODO: Provide advices on what ot enhance
 
